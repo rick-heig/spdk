@@ -32,6 +32,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "spdk/trace.h"
+
 #include "nvme_internal.h"
 
 /// @todo This what is this value supposed to be ? object_type (uint8_t) see trace.h
