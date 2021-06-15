@@ -34,6 +34,26 @@
 
 #include "nvme_internal.h"
 
+/// @todo This what is this value supposed to be ? object_type (uint8_t) see trace.h
+#define OBJECT_NVME_NS_IO				0xFF
+#define TRACE_GROUP_NVME_NS             0xb
+
+#define TRACE_NVME_NS_CMD_READ			SPDK_TPOINT_ID(TRACE_GROUP_NVME_NS, 0x0)
+#define TRACE_NVME_NS_CMD_WRITE         SPDK_TPOINT_ID(TRACE_GROUP_NVME_NS, 0x1)
+
+SPDK_TRACE_REGISTER_FN(nvme_ns_trace, "nvme_ns", TRACE_GROUP_NVME_NS)
+{
+	spdk_trace_register_object(OBJECT_NVME_NS_IO, 'r');
+	spdk_trace_register_description("NVME_NS_CMD_READ",
+					TRACE_NVME_NS_CMD_READ,
+					OWNER_NONE, OBJECT_NVME_NS_IO, 1, /* It seems this must be 1 for the first entry, then 0 below */
+					SPDK_TRACE_ARG_TYPE_INT, ""); /* Type of arg 1, name of arg 1 */
+	spdk_trace_register_description("NVME_NS_CMD_WRITE",
+					TRACE_NVME_NS_CMD_WRITE,
+					OWNER_NONE, OBJECT_NVME_NS_IO, 0,
+					SPDK_TRACE_ARG_TYPE_INT, "");
+}
+
 static inline struct nvme_request *_nvme_ns_cmd_rw(struct spdk_nvme_ns *ns,
 		struct spdk_nvme_qpair *qpair,
 		const struct nvme_payload *payload, uint32_t payload_offset, uint32_t md_offset,
@@ -630,6 +650,8 @@ spdk_nvme_ns_cmd_read(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair, vo
 			      io_flags, 0,
 			      0, false, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_READ, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -661,6 +683,8 @@ spdk_nvme_ns_cmd_read_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *q
 			      io_flags,
 			      apptag_mask, apptag, false, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_READ, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -695,6 +719,8 @@ spdk_nvme_ns_cmd_readv(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
 			      io_flags, 0, 0, true, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_READ, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -730,6 +756,8 @@ spdk_nvme_ns_cmd_readv_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *
 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
 			      io_flags, apptag_mask, apptag, true, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_READ, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -759,6 +787,8 @@ spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
 			      io_flags, 0, 0, false, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_WRITE, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -913,6 +943,8 @@ spdk_nvme_ns_cmd_write_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *
 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
 			      io_flags, apptag_mask, apptag, false, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_WRITE, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -947,6 +979,8 @@ spdk_nvme_ns_cmd_writev(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
 			      io_flags, 0, 0, true, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_WRITE, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
@@ -982,6 +1016,8 @@ spdk_nvme_ns_cmd_writev_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair 
 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
 			      io_flags, apptag_mask, apptag, true, &rc);
 	if (req != NULL) {
+		/// @todo check the parameters, they we chosen arbitrarily (two last)
+		spdk_trace_record(TRACE_NVME_NS_CMD_WRITE, 0, 0, (uintptr_t)qpair, lba_count);
 		return nvme_qpair_submit_request(qpair, req);
 	} else {
 		return nvme_ns_map_failure_rc(lba_count,
