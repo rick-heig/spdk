@@ -357,7 +357,6 @@ int main(int argc, char **argv)
 	 */
 	char		shm_name[64];
 	uint64_t	tpoint_group_mask = 0xF;
-	char		*end;
 	if (opts.shm_id >= 0) {
 		snprintf(shm_name, sizeof(shm_name), "/%s_trace.%d", opts.name, opts.shm_id);
 	} else {
