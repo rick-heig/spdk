@@ -105,6 +105,27 @@ check_io(void *arg, const struct spdk_nvme_cpl *completion)
 	}
 }
 
+static int tracing_index = 0;
+static char* message_buffer[128] = {NULL,};
+static uint64_t time_point_buffer[128] = {0,};
+
+inline
+static void simplistic_tracing(const char* message) {
+	time_point_buffer[tracing_index] = spdk_get_ticks();
+	message_buffer[tracing_index] = message;
+	tracing_index++;
+}
+
+static void print_tracing(void) {
+	for (int i = 0; i < tracing_index; ++i) {
+		if (i) {
+			printf("%s, time : [ns], delta : [ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i], time_point_buffer[i]-time_point_buffer[i-1]);
+		} else {
+			printf("%s, time : [ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i]);
+		}
+	}
+}
+
 static int
 cmb_copy(void)
 {
@@ -135,15 +156,11 @@ cmb_copy(void)
 
 	rw = CMB_COPY_READ;
 	/* Do the read to the CMB IO buffer */
-	uint64_t last_time = spdk_get_ticks();
-	uint64_t current_time = last_time;
-	fprintf(stdout, "Sending read request at time : %lu - delta : %lu\n", current_time, current_time-last_time);
+	simplistic_tracing("Sending read request");
 	rc = spdk_nvme_ns_cmd_read(g_config.read.ns, g_config.read.qpair, buf,
 				   g_config.read.slba, g_config.read.nlbas,
 				   check_io, &rw, 0);
-	last_time = current_time;
-	current_time = spdk_get_ticks();
-	fprintf(stdout, "Read request sent at time : %lu - delta : %lu\n", current_time, current_time-last_time);
+	simplistic_tracing("Read request sent");
 	if (rc != 0) {
 		fprintf(stderr, "starting read I/O failed\n");
 		return -EIO;
@@ -151,21 +168,15 @@ cmb_copy(void)
 	while (!g_config.read.done) {
 		spdk_nvme_qpair_process_completions(g_config.read.qpair, 0);
 	}
-	last_time = current_time;
-	current_time = spdk_get_ticks();
-	fprintf(stdout, "Read request completed at time : %lu - delta : %lu\n", current_time, current_time-last_time);
+	simplistic_tracing("Read request completed");
 
 	/* Do the write from the CMB IO buffer */
 	rw = CMB_COPY_WRITE;
-	last_time = current_time;
-	current_time = spdk_get_ticks();
-	fprintf(stdout, "Sending write request at time : %lu - delta : %lu\n", current_time, current_time-last_time);
+	simplistic_tracing("Sending write request");
 	rc = spdk_nvme_ns_cmd_write(g_config.write.ns, g_config.write.qpair, buf,
 				    g_config.write.slba, g_config.write.nlbas,
 				    check_io, &rw, 0);
-	last_time = current_time;
-	current_time = spdk_get_ticks();
-	fprintf(stdout, "Write request sent at time : %lu - delta : %lu\n", current_time, current_time-last_time);
+	simplistic_tracing("Write request sent");
 	if (rc != 0) {
 		fprintf(stderr, "starting write I/O failed\n");
 		return -EIO;
@@ -173,9 +184,10 @@ cmb_copy(void)
 	while (!g_config.write.done) {
 		spdk_nvme_qpair_process_completions(g_config.write.qpair, 0);
 	}
-	last_time = current_time;
-	current_time = spdk_get_ticks();
-	fprintf(stdout, "Write request completed at time : %lu - delta : %lu\n", current_time, current_time-last_time);
+	simplistic_tracing("Write request completed");
+
+	// Print the tracing
+	print_tracing();
 
 	/* Clear the done flags */
 	g_config.read.done = 0;
