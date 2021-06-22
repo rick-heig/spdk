@@ -38,6 +38,9 @@
 #include "spdk/string.h"
 #include "spdk/trace.h"
 
+// LTTng tracing
+#include "cmb_copy-tp.h"
+
 #define CMB_COPY_DELIM "-"
 #define CMB_COPY_READ 0
 #define CMB_COPY_WRITE 1
@@ -390,6 +393,26 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Unable to initialize SPDK env\n");
 		return 1;
 	}
+
+	// LTTng
+    /*
+     * A tracepoint() call.
+     *
+     * Arguments, as defined in cmb_copy-tp.h:
+     *
+     * 1. Tracepoint provider name   (required)
+     * 2. Tracepoint name            (required)
+     * 3. my_integer_arg             (first user-defined argument)
+     * 4. my_string_arg              (second user-defined argument)
+     *
+     * Notice the tracepoint provider and tracepoint names are
+     * NOT strings: they are in fact parts of variables that the
+     * macros in hello-tp.h create.
+     */
+    tracepoint(cmb_copy, my_first_tracepoint, 42, "The owls are not what they seem...");
+	for (x = 0; x < argc; ++x) {
+        tracepoint(cmb_copy, my_first_tracepoint, x, argv[x]);
+    }
 
 #if SIMPLE_TRACING_ON
 #else
