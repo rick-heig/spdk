@@ -356,7 +356,7 @@ int main(int argc, char **argv)
 	 * Setup tracing (this is similar to app_setup_trace from app.c)
 	 */
 	char		shm_name[64];
-	uint64_t	tpoint_group_mask = 0xF;
+	uint64_t	tpoint_group_mask = -1; /* All tracegroups, mask 0xFFF...F */
 	if (opts.shm_id >= 0) {
 		snprintf(shm_name, sizeof(shm_name), "/%s_trace.%d", opts.name, opts.shm_id);
 	} else {
@@ -426,6 +426,11 @@ int main(int argc, char **argv)
 			rc);
 		return -1;
 	}
+
+	/*
+	 * Cleanup
+	 */
+	spdk_trace_cleanup();
 
 	return rc;
 }
