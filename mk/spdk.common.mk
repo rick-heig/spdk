@@ -290,6 +290,8 @@ SYS_LIBS += -pthread
 endif
 
 CFLAGS   += $(COMMON_CFLAGS) -Wno-pointer-sign -Wstrict-prototypes -Wold-style-definition -std=gnu99
+# TODO : Put his in a "if" config
+CFLAGS   += -finstrument-functions
 CXXFLAGS += $(COMMON_CFLAGS)
 
 SYS_LIBS += -lrt
