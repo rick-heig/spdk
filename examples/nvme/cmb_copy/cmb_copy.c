@@ -105,18 +105,26 @@ check_io(void *arg, const struct spdk_nvme_cpl *completion)
 	}
 }
 
+#define SIMPLE_TRACING_ON 1
+
+#if SIMPLE_TRACING_ON
 static int tracing_index = 0;
 static char* message_buffer[128] = {NULL,};
 static uint64_t time_point_buffer[128] = {0,};
+#endif
 
 inline
 static void simplistic_tracing(const char* message) {
+// empty function call will be removed by compiler
+#if SIMPLE_TRACING_ON
 	time_point_buffer[tracing_index] = spdk_get_ticks();
 	message_buffer[tracing_index] = message;
 	tracing_index++;
+#endif
 }
 
 static void print_tracing(void) {
+#if SIMPLE_TRACING_ON
 	for (int i = 0; i < tracing_index; ++i) {
 		if (i) {
 			printf("%s, time : %lu [ns], delta : %lu [ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i], time_point_buffer[i]-time_point_buffer[i-1]);
@@ -124,6 +132,7 @@ static void print_tracing(void) {
 			printf("%s, time : %lu [ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i]);
 		}
 	}
+#endif
 }
 
 static int
