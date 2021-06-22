@@ -292,7 +292,7 @@ endif
 CFLAGS   += $(COMMON_CFLAGS) -Wno-pointer-sign -Wstrict-prototypes -Wold-style-definition -std=gnu99
 # TODO : Put his in a "if" config
 CFLAGS   += -finstrument-functions
-LDFLAGS  += -finstrument-functions
+LDFLAGS  += -g -finstrument-functions
 CXXFLAGS += $(COMMON_CFLAGS)
 
 SYS_LIBS += -lrt
