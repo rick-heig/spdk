@@ -119,9 +119,9 @@ static void simplistic_tracing(const char* message) {
 static void print_tracing(void) {
 	for (int i = 0; i < tracing_index; ++i) {
 		if (i) {
-			printf("%s, time : %lu[ns], delta : %lu[ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i], time_point_buffer[i]-time_point_buffer[i-1]);
+			printf("%s, time : %lu [ns], delta : %lu [ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i], time_point_buffer[i]-time_point_buffer[i-1]);
 		} else {
-			printf("%s, time : %lu[ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i]);
+			printf("%s, time : %lu [ns]\n", message_buffer[i] ? message_buffer[i] : "", time_point_buffer[i]);
 		}
 	}
 }
