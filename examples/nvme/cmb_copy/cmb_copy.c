@@ -363,7 +363,8 @@ int main(int argc, char **argv)
 		snprintf(shm_name, sizeof(shm_name), "/%s_trace.pid%d", opts.name, (int)getpid());
 	}
 
-	if (spdk_trace_init(shm_name, 10 /*opts->num_entries*/) != 0) {
+	/*                        Number of elements in circular buffer */
+	if (spdk_trace_init(shm_name, 1000 /*opts->num_entries*/) != 0) {
 		fprintf(stderr, "Unable to initialize SPDK trace\n");
 		return -1;
 	}
