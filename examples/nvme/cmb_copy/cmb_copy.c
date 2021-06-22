@@ -36,6 +36,7 @@
 #include "spdk/env.h"
 #include "spdk/nvme.h"
 #include "spdk/string.h"
+#include "spdk/trace.h"
 
 #define CMB_COPY_DELIM "-"
 #define CMB_COPY_READ 0
@@ -349,6 +350,42 @@ int main(int argc, char **argv)
 	if (spdk_env_init(&opts) < 0) {
 		fprintf(stderr, "Unable to initialize SPDK env\n");
 		return 1;
+	}
+
+	/*
+	 * Setup tracing (this is similar to app_setup_trace from app.c)
+	 */
+	char		shm_name[64];
+	uint64_t	tpoint_group_mask;
+	char		*end;
+	if (opts.shm_id >= 0) {
+		snprintf(shm_name, sizeof(shm_name), "/%s_trace.%d", opts.name, opts.shm_id);
+	} else {
+		snprintf(shm_name, sizeof(shm_name), "/%s_trace.pid%d", opts.name, (int)getpid());
+	}
+
+	if (spdk_trace_init(shm_name, 1 /*opts->num_entries*/) != 0) {
+		fprintf(stderr, "Unable to initialize SPDK trace\n");
+		return -1;
+	}
+
+	const char *tpoint_group_mask = "0xF"; // All 16 possible trace groups
+	if (/*opts->*/tpoint_group_mask != NULL) {
+		errno = 0;
+		tpoint_group_mask = strtoull(/*opts->*/tpoint_group_mask, &end, 16);
+		if (*end != '\0' || errno) {
+			SPDK_ERRLOG("invalid tpoint mask %s\n", /*opts->*/tpoint_group_mask);
+		} else {
+			SPDK_NOTICELOG("Tracepoint Group Mask %s specified.\n", /*opts->*/tpoint_group_mask);
+			SPDK_NOTICELOG("Use 'spdk_trace -s %s %s %d' to capture a snapshot of events at runtime.\n",
+				       opts.name,
+				       opts.shm_id >= 0 ? "-i" : "-p",
+				       opts.shm_id >= 0 ? opts.shm_id : getpid());
+#if defined(__linux__)
+			SPDK_NOTICELOG("Or copy /dev/shm%s for offline analysis/debug.\n", shm_name);
+#endif
+			spdk_trace_set_tpoint_group_mask(tpoint_group_mask);
+		}
 	}
 
 	/*
