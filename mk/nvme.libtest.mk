@@ -37,6 +37,7 @@ include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
 include $(SPDK_ROOT_DIR)/mk/spdk.modules.mk
 
 C_SRCS := $(APP:%=%.c)
+C_SRCS += $(APP_EXTRA_C_SRCS)
 
 SPDK_LIB_LIST = $(SOCK_MODULES_LIST) nvme vmd
 

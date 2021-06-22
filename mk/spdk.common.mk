@@ -296,6 +296,8 @@ SYS_LIBS += -lrt
 SYS_LIBS += -luuid
 SYS_LIBS += -lcrypto
 SYS_LIBS += -lm
+# TODO : Put this in a "if" config
+SYS_LIBS += -llttng-ust
 
 ifneq ($(CONFIG_NVME_CUSE)$(CONFIG_FUSE),nn)
 SYS_LIBS += -lfuse3

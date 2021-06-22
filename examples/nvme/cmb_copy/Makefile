@@ -34,5 +34,6 @@
 SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../..)
 
 APP = cmb_copy
+APP_EXTRA_C_SRCS = cmb_copy-tp.c
 
 include $(SPDK_ROOT_DIR)/mk/nvme.libtest.mk
