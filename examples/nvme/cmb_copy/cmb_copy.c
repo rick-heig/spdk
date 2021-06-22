@@ -135,9 +135,11 @@ cmb_copy(void)
 
 	rw = CMB_COPY_READ;
 	/* Do the read to the CMB IO buffer */
+	fprintf(stdout, "Sending read request at time : %ull\n", spdk_get_ticks());
 	rc = spdk_nvme_ns_cmd_read(g_config.read.ns, g_config.read.qpair, buf,
 				   g_config.read.slba, g_config.read.nlbas,
 				   check_io, &rw, 0);
+	fprintf(stdout, "read request sent at time : %ull\n", spdk_get_ticks());
 	if (rc != 0) {
 		fprintf(stderr, "starting read I/O failed\n");
 		return -EIO;
@@ -145,12 +147,15 @@ cmb_copy(void)
 	while (!g_config.read.done) {
 		spdk_nvme_qpair_process_completions(g_config.read.qpair, 0);
 	}
+	fprintf(stdout, "Read request completed at time : %ull\n", spdk_get_ticks());
 
 	/* Do the write from the CMB IO buffer */
 	rw = CMB_COPY_WRITE;
+	fprintf(stdout, "Sending write request at time : %ull\n", spdk_get_ticks());
 	rc = spdk_nvme_ns_cmd_write(g_config.write.ns, g_config.write.qpair, buf,
 				    g_config.write.slba, g_config.write.nlbas,
 				    check_io, &rw, 0);
+	fprintf(stdout, "Write request sent at time : %ull\n", spdk_get_ticks());
 	if (rc != 0) {
 		fprintf(stderr, "starting write I/O failed\n");
 		return -EIO;
@@ -158,6 +163,7 @@ cmb_copy(void)
 	while (!g_config.write.done) {
 		spdk_nvme_qpair_process_completions(g_config.write.qpair, 0);
 	}
+	fprintf(stdout, "Write request completed at time : %ull\n", spdk_get_ticks());
 
 	/* Clear the done flags */
 	g_config.read.done = 0;
