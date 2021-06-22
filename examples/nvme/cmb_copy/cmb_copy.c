@@ -391,6 +391,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+#if SIMPLE_TRACING_ON
+#else
 	/*
 	 * Setup tracing (this is similar to app_setup_trace from app.c)
 	 */
@@ -409,6 +411,7 @@ int main(int argc, char **argv)
 	}
 
 	spdk_trace_set_tpoint_group_mask(tpoint_group_mask);
+#endif
 
 	/*
 	 * CMBs only apply to PCIe attached NVMe controllers so we
@@ -467,10 +470,13 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+#if SIMPLE_TRACING_ON
+#else
 	/*
 	 * Cleanup
 	 */
 	spdk_trace_cleanup();
+#endif
 
 	return rc;
 }
