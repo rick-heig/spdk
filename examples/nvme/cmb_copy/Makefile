@@ -37,3 +37,5 @@ APP = cmb_copy
 APP_EXTRA_C_SRCS = cmb_copy-tp.c
 
 include $(SPDK_ROOT_DIR)/mk/nvme.libtest.mk
+
+COMMON_CFLAGS += -I.
