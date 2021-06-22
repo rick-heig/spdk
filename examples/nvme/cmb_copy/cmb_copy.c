@@ -410,7 +410,7 @@ int main(int argc, char **argv)
      * macros in hello-tp.h create.
      */
     tracepoint(cmb_copy, my_first_tracepoint, 42, "The owls are not what they seem...");
-	for (x = 0; x < argc; ++x) {
+	for (int x = 0; x < argc; ++x) {
         tracepoint(cmb_copy, my_first_tracepoint, x, argv[x]);
     }
 
